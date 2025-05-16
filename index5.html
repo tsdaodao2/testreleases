@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub Releases 列表</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .release-card {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .release-title {
+            color: #0366d6;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+        }
+
+        .release-date {
+            color: #586069;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .assets-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .asset-item {
+            display: flex;
+            align-items: center;
+            padding: 0.25rem 0;
+        }
+
+        .asset-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+
+        .asset-link {
+            color: #24292e;
+            text-decoration: none;
+        }
+
+        .asset-link:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #586069;
+        }
+
+        .error {
+            color: #cb2431;
+            padding: 1rem;
+            border: 1px solid #ffeef0;
+            background: #ffeef0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Release 列表</h1>
+    <div id="release-container"></div>
+
+    <script>
+        // 修改为你的仓库信息
+        const REPO_OWNER = 'tsdaodao2';
+        const REPO_NAME = 'testreleases';
+
+        // GitHub API 地址
+        const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases`;
+
+        async function fetchReleases() {
+            const container = document.getElementById('release-container');
+            
+            try {
+                // 显示加载状态
+                container.innerHTML = '<div class="loading">加载中...</div>';
+
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+                }
+
+                const releases = await response.json();
+                
+                if (releases.length === 0) {
+                    container.innerHTML = '<div class="error">暂无 Release</div>';
+                    return;
+                }
+
+                // 按发布日期倒序排列
+                releases.sort((a, b) => 
+                    new Date(b.published_at) - new Date(a.published_at)
+                );
+
+                // 生成 HTML
+                container.innerHTML = releases.map(release => `
+                    <div class="release-card">
+                        <h2 class="release-title">${release.name || '未命名 Release'}</h2>
+                        <div class="release-date">
+                            🗓️ ${new Date(release.published_at).toLocaleDateString()}
+                        </div>
+                        ${release.body ? `<div class="release-description">${release.body}</div>` : ''}
+                        <ul class="assets-list">
+                            ${release.assets.map(asset => `
+                                <li class="asset-item">
+                                    <svg class="asset-icon" viewBox="0 0 16 16" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M3.5 1.75a.25.25 0 01.25-.25h3a.75.75 0 000 1.5h-3a.25.25 0 01-.25-.25zm3.25.25a.75.75 0 000-1.5h-3a.75.75 0 000 1.5h3z"></path>
+                                        <path fill-rule="evenodd" d="M2 2.5A1.5 1.5 0 013.5 1h5a1.5 1.5 0 011.5 1.5v11.25a.75.75 0 01-1.064.681L7 13.576l-2.936 1.355A.75.75 0 013 13.75V2.5zm1.5-.25a.25.25 0 00-.25.25v11.066l2.19-1.013a.75.75 0 01.62 0l2.19 1.013V2.5a.25.25 0 00-.25-.25h-5z"></path>
+                                    </svg>
+                                    <a href="${asset.browser_download_url}" 
+                                       class="asset-link" 
+                                       download="${asset.name}">
+                                        ${asset.name} (${formatBytes(asset.size)})
+                                    </a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        ❌ 加载失败: ${error.message}<br>
+                        请检查：<br>
+                        1. 仓库是否存在 (${REPO_OWNER}/${REPO_NAME})<br>
+                        2. 网络连接是否正常
+                    </div>
+                `;
+            }
+        }
+
+        // 字节单位转换
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 页面加载完成后执行
+        window.addEventListener('DOMContentLoaded', fetchReleases);
+    </script>
+</body>
+</html>
