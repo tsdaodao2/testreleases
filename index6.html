@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>GitHub Releases 浏览器</title>
+    <title> Releases </title>
     <!-- 引入 QRCode.js -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
@@ -77,12 +77,14 @@
     <div id="release-container"></div>
 
     <script>
+
+        // https://tsdaodao2.github.io/testreleases/index6.html?owner=tsdaodao2&repo=testreleases&ext=html
+
         // 从 URL 参数获取配置
         const urlParams = new URLSearchParams(window.location.search);
         const REPO_OWNER = urlParams.get('owner') || 'xxxx';
         const REPO_NAME = urlParams.get('repo') || 'yyyy';
         const FILE_EXT = (urlParams.get('ext') || 'zip').toLowerCase();
-
         // 生成二维码
         function generateQRCode() {
             const currentURL = window.location.href;
