@@ -134,8 +134,8 @@
                 // 构造显示内容
                 let html = `
                     <div class="config-panel">
-                        当前查看仓库：<strong>${REPO_OWNER}/${REPO_NAME}</strong>
-                        <span class="filter-info">（只显示 .${FILE_EXT} 文件）</span>
+                        当前：<strong>${REPO_OWNER}/${REPO_NAME}</strong>
+                        <span hidden class="filter-info">（只显示 .${FILE_EXT} 文件）</span>
                     </div>
                 `;
 
@@ -149,8 +149,10 @@
                         <div class="release-card">
                             <h2>${release.name || '未命名版本'}</h2>
                             <div class="release-meta">
-                                <span>版本号：${release.tag_name}</span>
+                                <span hidden >版本号：${release.tag_name}</span>
                                 <span>发布日期：${new Date(release.published_at).toLocaleDateString()}</span>
+                                         <span> ${new Date(release.published_at).toLocaleTimeString()}</span>
+                                
                             </div>
                             <ul class="assets-list">
                                 ${filteredAssets.map(asset => `
